@@ -57,18 +57,6 @@ const Home = ({navigation}) => {
   const addToTeam = (user) => {
     setSelectedUsers([...selectedUsers, user]);
   };
-  // Function to add a user to the team
-  // const addToTeam = () => {
-  //   // Filter selected users by unique domains
-  //   const uniqueDomains = [...new Set(selectedUsers.map((user) => user.domain))];
-  //   const uniqueUsersByDomain = selectedUsers.filter((user) => {
-  //     const count = uniqueDomains.filter((domain) => domain === user.domain).length;
-  //     return count === 1; // Include users from domains that appear only once
-  //   });
-
-  //   setTeam(uniqueUsersByDomain);
-  // };
-
   // Render user card component
   const renderUserCard = ({ item }) => (
     <View style={styles.box}>
@@ -191,15 +179,6 @@ const Home = ({navigation}) => {
         color={'red'}
       />
     </View>
-    
-      {/* <View style={styles.teamContainer}>
-        <Button title="Add To Team" onPress={addToTeam} />
-        <Text style={styles.teamTitle}>Team Members:</Text>
-        {team.map((user) => (
-          <Text key={user.id} style={styles.teamMember}>{user.first_name} {user.last_name} - {user.domain}</Text>
-        ))}
-      </View> */}
-
     </View>
   );
 };
