@@ -1,9 +1,10 @@
 
-import React, { useState, useEffect, version } from 'react';
-import { View, Text, FlatList, TextInput, Button, StyleSheet, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, TextInput, Button, StyleSheet, Image,ScrollView } from 'react-native';
 import userData from './data.json'; // Import user data
 import SelectDropdown from 'react-native-select-dropdown';
-const Home = () => {
+
+const Home = ({navigation}) => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
@@ -14,6 +15,8 @@ const Home = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
   const [paginatedData, setPaginatedData] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  
   useEffect(() => {
     // Apply filters and search query to user data
     let filteredData = userData.filter((user) => {
@@ -50,18 +53,39 @@ const Home = () => {
       setCurrentPage(currentPage - 1);
     }
   };
+  // Function to add a user to the team
+  const addToTeam = (user) => {
+    setSelectedUsers([...selectedUsers, user]);
+  };
+  // Function to add a user to the team
+  // const addToTeam = () => {
+  //   // Filter selected users by unique domains
+  //   const uniqueDomains = [...new Set(selectedUsers.map((user) => user.domain))];
+  //   const uniqueUsersByDomain = selectedUsers.filter((user) => {
+  //     const count = uniqueDomains.filter((domain) => domain === user.domain).length;
+  //     return count === 1; // Include users from domains that appear only once
+  //   });
+
+  //   setTeam(uniqueUsersByDomain);
+  // };
 
   // Render user card component
   const renderUserCard = ({ item }) => (
     <View style={styles.box}>
       <View style={styles.inner}>
-       
-        <Text style={styles.text}>First Name: {item.first_name}</Text>
-        <Text style={styles.text}>Last Name: {item.last_name}</Text>
+        <Image
+          source={{ uri: item.avatar }} // Set the image source to the avatar URL
+          style={{ width: 100, height: 60 }} // Set the width and height of the image
+        />
+        <Text style={styles.text}>Full Name: {item.first_name} {item.last_name} </Text>
         <Text style={styles.text}>Email: {item.email}</Text>
         <Text style={styles.text}>Domain: {item.domain}</Text>
         <Text style={styles.text}>Gender: {item.gender}</Text>
         <Text style={styles.text}>Availability: {item.available ? 'true' : 'false'}</Text>
+        
+        <Button  title="Add To Team" onPress={() => addToTeam(item)}
+          disabled={!item.available} 
+        />
       </View>
 
     </View>
@@ -78,7 +102,7 @@ const Home = () => {
       {/* Filter components */}
       <View style={styles.filter}>
         <View style={styles.domain}>
-          <SelectDropdown 
+          <SelectDropdown
             data={[
               'Marketing',
               'Sales',
@@ -95,67 +119,87 @@ const Home = () => {
             }}
             defaultButtonText="Domains"
             rowTextForSelection={(item, index) => {
-              
+
               return item;
             }}
             buttonStyle={{
-              backgroundColor: 'lightblue', 
-              borderRadius:20,
-              marginLeft:15,
-              marginRight:5
+              backgroundColor: 'lightblue',
+              borderRadius: 20,
+              marginLeft: 15,
+              marginRight: 5
             }}
             dropdownStyle={{
-              backgroundColor: 'lightblue', 
+              backgroundColor: 'lightblue',
             }}
-           
+
           />
         </View>
-          <View style={styles.gender}>
+        <View style={styles.gender}>
           <SelectDropdown
-          data={[
-            'Male',
-            'Female'
-          ]}
-          onSelect={(selectedItem) => setFilters({ ...filters, gender: selectedItem })}
-          buttonTextAfterSelection={(selectedItem, index) => {
-            return selectedItem;
-          }}
-          defaultButtonText="Gender"
-          rowTextForSelection={(item, index) => {
-            return item;
-          }}
-          buttonStyle={{
-            backgroundColor: 'lightblue', 
-            borderRadius:20,
-            width:'100%'
-          }}
-          dropdownStyle={{
-            backgroundColor: 'lightblue', 
-          }}
-        />  
-          </View>
-          
+            data={[
+              'Male',
+              'Female'
+            ]}
+            onSelect={(selectedItem) => setFilters({ ...filters, gender: selectedItem })}
+            buttonTextAfterSelection={(selectedItem, index) => {
+              return selectedItem;
+            }}
+            defaultButtonText="Gender"
+            rowTextForSelection={(item, index) => {
+              return item;
+            }}
+            buttonStyle={{
+              backgroundColor: 'lightblue',
+              borderRadius: 20,
+              width: '100%'
+            }}
+            dropdownStyle={{
+              backgroundColor: 'lightblue',
+            }}
+          />
+        </View>
+
       </View>
 
 
       {/* User card list */}
+      <ScrollView style={styles.userListContainer}>
       <FlatList
         data={paginatedData}
         renderItem={renderUserCard}
         keyExtractor={(item) => item.id.toString()}
       />
+      </ScrollView>
+
       <View style={styles.mainButton}>
         <View style={styles.button}>
-        {currentPage > 1 && (
-        <Button title="Previous Page" onPress={handlePreviousPage} color={'red'}/>
-      )}
+          {currentPage > 1 && (
+            <Button title="Previous Page" onPress={handlePreviousPage} color={'red'} />
+          )}
         </View>
         <View style={styles.button}>
-        {currentPage * itemsPerPage < userData.length && (
-        <Button title="Next Page" onPress={handleNextPage}color={'purple'} />
-      )}
+          {currentPage * itemsPerPage < userData.length && (
+            <Button title="Next Page" onPress={handleNextPage} color={'purple'} />
+          )}
         </View>
       </View>
+    {/* View Team Details button */}
+    <View style={{marginBottom:20,marginLeft:5,marginRight:10}}>
+    <Button
+        title="View Team Details"
+        onPress={() => navigation.navigate('TeamDetails', { team: selectedUsers })}
+        color={'red'}
+      />
+    </View>
+    
+      {/* <View style={styles.teamContainer}>
+        <Button title="Add To Team" onPress={addToTeam} />
+        <Text style={styles.teamTitle}>Team Members:</Text>
+        {team.map((user) => (
+          <Text key={user.id} style={styles.teamMember}>{user.first_name} {user.last_name} - {user.domain}</Text>
+        ))}
+      </View> */}
+
     </View>
   );
 };
@@ -170,7 +214,7 @@ const styles = StyleSheet.create({
   },
   box: {
     margin: 5,
-    backgroundColor: 'green',
+    backgroundColor: '#e802d5',
     flexDirection: 'row',
     flexWrap: 'wrap',
     width: '75%',
@@ -204,16 +248,28 @@ const styles = StyleSheet.create({
   },
   filter: {
     flexDirection: 'row',
-    width:'90%',
-    marginBottom:5
+    width: '90%',
+    marginBottom: 5
   },
-  domain:{
-    
-   
+  gender: {
+    marginRight: 20,
+    width: '45%'
   },
-  gender:{
-    marginRight:20,
-    width:'45%'
+  teamContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  teamTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginVertical: 10,
+  },
+  teamMember: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  userListContainer: {
+    flex: 1, // Allow the user list to take up available space
   }
 })
 
